@@ -1,1 +1,2 @@
 Assets/TextMesh[[:space:]]Pro/Fonts/07鉄瓶ゴシック[[:space:]]SDF.asset filter=lfs diff=lfs merge=lfs -text
+Assets/TextMesh[[:space:]]Pro/Fonts/*.asset filter=lfs diff=lfs merge=lfs -text
