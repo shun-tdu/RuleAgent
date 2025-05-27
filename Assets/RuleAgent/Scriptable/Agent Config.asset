@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a5149b7470dc61429d0ba94ce687e11, type: 3}
+  m_Name: Agent Config
+  m_EditorClassIdentifier: 
+  allSensors:
+  - {fileID: 11400000, guid: a85f0a645cb5aff4280abcf58ea3b523, type: 2}
+  - {fileID: 11400000, guid: db7f7f78e28eb804baea1eabad50a080, type: 2}
+  - {fileID: 11400000, guid: 9434288fa02c29641af8281b76841f6e, type: 2}
+  allEvaluators:
+  - {fileID: 11400000, guid: 117b82674c08b3f4f94f0c8bb4a84269, type: 2}
+  - {fileID: 11400000, guid: b56d0d559ca266140b523fca0b05ddd0, type: 2}
+  - {fileID: 11400000, guid: c907efb8f7a48af4ababc8bc6cc7de17, type: 2}
+  sensorEnabled: 000000
+  evaluatorWeights:
+  - 0
+  - 0
+  - 0

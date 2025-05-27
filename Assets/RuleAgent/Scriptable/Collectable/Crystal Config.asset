@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dffdef31f184899a22cd173f10ba307, type: 3}
+  m_Name: Crystal Config
+  m_EditorClassIdentifier: 
+  crystals:
+  - type: 0
+    prefab: {fileID: 8014854657468957836, guid: 3cda14150882d9f4d9b93bc6d843eee1,
+      type: 3}
+    pointValue: 10
