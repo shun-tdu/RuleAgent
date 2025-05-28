@@ -16,6 +16,7 @@ public class AgentController : MonoBehaviour, ITeleportable
     private Queue<(List<float>features, float reward)> _creditBuffer;
     private int _bufferLength = 5; //遡って報酬を割り当てるステップ数
     private int _pendingHumanReward = 0; //次のUpdateで消費するフィードバック
+    private List<float> _lastFeatures;
 
 
     /*----グリッドベース移動制御のフィールド----*/
@@ -138,30 +139,36 @@ public class AgentController : MonoBehaviour, ITeleportable
     void DoEvaluatedWalk()
     {
         var dirs = new[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right, };
-        float bestScore = float.MinValue;
+        float bestQ = float.MinValue;
         var bestCands = new List<Vector2Int>();
+        List<float> bestFeatures = null;
 
         //上下左右に対してスコアを計算
         foreach (var cand in dirs.Select(d => _currentGrid + d))
         {
             if (!_grid.InBounds(cand) || !_grid.IsWalkable(cand) || !_grid.IsOneWayAllowed(_currentGrid, cand))
                 continue;
+
+            var phy = ComputeFeatures(cand);
+            float q = EstimateQ(phy);
+
+            if (q > bestQ)
+            {
+                bestQ = q;
+                bestCands.Clear();
+                bestCands.Add(cand);
+                bestFeatures = phy;
+            }
+            else if (Mathf.Approximately(q, bestQ))
+            {
+                bestCands.Add(cand);
+            }
+
             float sum = 0f;
             for (int i = 0; i < _sensors.Length; i++)
             {
                 float sv = _sensors[i].Sense(cand, _grid);
                 sum += _evaluators[i].Evaluate(cand, sv);
-            }
-
-            if (sum > bestScore)
-            {
-                bestScore = sum;
-                bestCands.Clear();
-                bestCands.Add(cand);
-            }
-            else if (Mathf.Approximately(sum, bestScore))
-            {
-                bestCands.Add(cand);
             }
         }
 
@@ -169,6 +176,10 @@ public class AgentController : MonoBehaviour, ITeleportable
         {
             //同点候補からランダムに選ぶ
             _targetGrid = bestCands[Random.Range(0, bestCands.Count)];
+            _lastFeatures = bestFeatures;
+            if (_creditBuffer.Count() >= _bufferLength)
+                _creditBuffer.Dequeue();
+            _creditBuffer.Enqueue((bestFeatures, 0f));
             _isMoving = true;
         }
     }
