@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class LeanedModel : MonoBehaviour
+public class LeanedModel
 {
     public float[] weights;
     public bool[] sensorEnabled;

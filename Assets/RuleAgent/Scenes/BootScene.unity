@@ -365,7 +365,7 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
---- !u!1 &1747667764
+--- !u!1 &1323409189
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -373,37 +373,37 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1747667766}
-  - component: {fileID: 1747667765}
+  - component: {fileID: 1323409191}
+  - component: {fileID: 1323409190}
   m_Layer: 0
-  m_Name: BootController
+  m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1747667765
+--- !u!114 &1323409190
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1747667764}
+  m_GameObject: {fileID: 1323409189}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 038daa9bc556ccb4b910ea37393a85e3, type: 3}
+  m_Script: {fileID: 11500000, guid: 1ebe8171320246a47bb920665e3fc239, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!4 &1747667766
+--- !u!4 &1323409191
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1747667764}
+  m_GameObject: {fileID: 1323409189}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.5652401, y: 1.1397487, z: 1.5618708}
+  m_LocalPosition: {x: 345.78955, y: 266.87897, z: 1.5028784}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -601,5 +601,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 2067233836}
   - {fileID: 1161941353}
-  - {fileID: 1747667766}
   - {fileID: 2113942344}
+  - {fileID: 1323409191}

@@ -13,6 +13,7 @@ public class AgentController : MonoBehaviour, ITeleportable
     [Tooltip("割引率")] [SerializeField] private float gamma = 0.9f;
 
     private float[] _weights; //wベクトル(センサー数分)
+    private bool[] _sensorEnabled;//センサのEnable情報
     private Queue<(List<float>features, float reward)> _creditBuffer;
     private int _bufferLength = 5; //遡って報酬を割り当てるステップ数
     private int _pendingHumanReward = 0; //次のUpdateで消費するフィードバック
@@ -38,6 +39,9 @@ public class AgentController : MonoBehaviour, ITeleportable
 
     private void Awake()
     {
+        //AgentManagerに追加
+        AgentManager.I.Register(this);
+        
         _agentStatus = GetComponent<AgentStatus>();
         _agentStatus.OnDeath += HandleDeath;
 
@@ -46,6 +50,11 @@ public class AgentController : MonoBehaviour, ITeleportable
         _weights = new float[featureCount];
         for (int i = 0; i < featureCount; i++) _weights[i] = 0f;
         _creditBuffer = new Queue<(List<float> features, float reward)>(_bufferLength + 1);
+    }
+
+    private void OnDestroy()
+    {
+        AgentManager.I.Unregister(this);
     }
 
     private void OnEnable()
@@ -64,6 +73,7 @@ public class AgentController : MonoBehaviour, ITeleportable
     public void Initialize(AgentConfig config, GridManager grid, Transform goalTransform)
     {
         _sensors = config.allSensors.Where((s, i) => config.sensorEnabled[i]).ToArray();
+        _sensorEnabled = config.sensorEnabled;
         _evaluators = config.allEvaluators;
         _maxModules = config.maxModules;
         _moveSpeed = config.moveSpeed;
@@ -243,7 +253,7 @@ public class AgentController : MonoBehaviour, ITeleportable
         UIManager.I.ShowGameOverUI();
     }
 
-    /*----強化学習周りのメソッド----*/
+    /*----------------強化学習周りのメソッド----------------*/
     /// <summary>
     /// Good(+1)/Bad(-1)が飛んできたらキューに投げる
     /// </summary>
@@ -300,5 +310,27 @@ public class AgentController : MonoBehaviour, ITeleportable
                 _weights[i] += alpha * delta * phy[i];
             //減衰させる場合は perReward * gamma
         }
+    }
+
+
+    /// <summary>
+    /// 学習済みの重みを外部に渡す
+    /// </summary>
+    public float[] GetWeights()
+    {
+        if (_weights == null)
+            return Array.Empty<float>();
+        return (float[])_weights.Clone();
+    }
+    
+    
+    /// <summary>
+    /// センサーのEnable情報を外部に渡す
+    /// </summary>
+    public bool[] GetSensorEnabledFlag()
+    {
+        if (_sensorEnabled == null)
+            return Array.Empty<bool>();
+        return (bool[])_sensorEnabled.Clone();
     }
 }
