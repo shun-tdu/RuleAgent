@@ -44,7 +44,11 @@ public class AgentController : MonoBehaviour, ITeleportable
         
         _agentStatus = GetComponent<AgentStatus>();
         _agentStatus.OnDeath += HandleDeath;
+    }
 
+    private void Start()
+    {
+        //強化学習の初期化処理をAwakeからStartに変更
         //強化学習 : 重みとバッファ初期化
         int featureCount = _sensors.Length;
         _weights = new float[featureCount];

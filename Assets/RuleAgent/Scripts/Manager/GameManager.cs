@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
         //他のシングルトンを初期化
         if (CurrencyManager.I == null) new GameObject("CurrencyManager").AddComponent<CurrencyManager>();
         if (ScoreManager.I == null) new GameObject("ScoreManager").AddComponent<ScoreManager>();
-
+        if (AgentManager.I == null) new GameObject("AgentManager").AddComponent<AgentManager>();
     }
 
     private void Start()

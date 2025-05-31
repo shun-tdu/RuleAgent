@@ -10,6 +10,7 @@ public class PlayerSpawner : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log("Player Spawner has called");
         var model = ModelPersistence.Load();
         var cfg = CustomizationState.CurrentConfig;
         if (cfg == null)
@@ -20,6 +21,7 @@ public class PlayerSpawner : MonoBehaviour
         
         if (model != null)
         {
+            Debug.Log("Model has existed");
             //重みの反映
             if (model.weights != null && model.weights.Length == cfg.evaluatorWeights.Length)
             {
