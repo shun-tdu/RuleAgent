@@ -29,9 +29,10 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         I = this;
         DontDestroyOnLoad(gameObject);
-        
+
         //他のシングルトンを初期化
         if (CurrencyManager.I == null) new GameObject("CurrencyManager").AddComponent<CurrencyManager>();
         if (ScoreManager.I == null) new GameObject("ScoreManager").AddComponent<ScoreManager>();
@@ -64,17 +65,21 @@ public class GameManager : MonoBehaviour
                 Time.timeScale = 0f;
                 break;
             case GameState.Cleared:
-                OnStageClear();
+                HandleStageClear();
                 break;
             case GameState.GameOver:
-                OnGameOver();
+                HandleGameOver();
                 break;
         }
     }
 
-    private void OnStageClear()
+    /// <summary>
+    /// ステージクリア時の一連処理(内部専用)
+    /// </summary>
+    private void HandleStageClear()
     {
         Time.timeScale = 0f;
+        
         var agents = AgentManager.I.GetAllAgents();
         if (agents == null || agents.Count == 0)
         {
@@ -88,35 +93,76 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("OnStageClear:代表Agentが見つかりません");
             return;
         }
-        
+
         //学習済みモデルを組み立て
         var model = new LeanedModel
         {
             weights = primary.GetWeights(),
             sensorEnabled = primary.GetSensorEnabledFlag()
         };
-        
+
         //学習済みモデルを保存
         ModelPersistence.Save(model);
         Debug.Log("OnStageClear :モデルを保存しました");
-        
+
         //クリアUI表示
+        UIManager.I.ShowStageClearUI();
+        
+        //スタートメニュへ遷移
+        ChangeState(GameState.StartMenu);
     }
 
-    private void OnGameOver()
+
+    /// <summary>
+    /// ゲームオーバ時の一連の処理
+    /// </summary>
+    private void HandleGameOver()
     {
         Time.timeScale = 0f;
-        
-        // UIManager.I.ShowGameOverUI();
+        if (UIManager.I != null)
+        {
+            UIManager.I.ShowGameOverUI();
+        }
+        else
+        {
+            Debug.LogWarning("HandleGameOver: UIManager がアタッチされていません");
+        }
     }
 
-    public void RestartStage()
+
+    /*--------Publicメソッド--------*/
+    
+    /// <summary>
+    /// ゲームクリア時の処理を一括で行う
+    /// </summary>
+    public void TriggerStageClear()
+    {
+        ChangeState(GameState.Cleared);
+    }
+    
+    /// <summary>
+    /// ゲームオーバ時の処理を一括で行う
+    /// </summary>
+    public void TriggerGameOver()
+    {
+        ChangeState(GameState.GameOver);
+    }
+
+    /// <summary>
+    /// ステージをリセットする
+    /// </summary>
+    public void TriggerRestartStage()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         ChangeState(GameState.Playing);
     }
 
+
+    /// <summary>
+    /// 次のステージへ遷移
+    /// </summary>
+    /// <param name="nextScene"></param>
     public void LoadNextStage(string nextScene)
     {
         Time.timeScale = 1f;
@@ -124,6 +170,9 @@ public class GameManager : MonoBehaviour
         ChangeState(GameState.Playing);
     }
 
+    /// <summary>
+    /// マップ選択画面へ
+    /// </summary>
     public void LoadMapSelect()
     {
         Time.timeScale = 1f;
@@ -131,13 +180,21 @@ public class GameManager : MonoBehaviour
         ChangeState(GameState.MapSelect);
     }
 
+
+    /// <summary>
+    /// ワークショップ画面へ
+    /// </summary>
     public void LoadWorkShop()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("WorkShopScene");
         ChangeState(GameState.WorkShop);
     }
-    
+
+
+    /// <summary>
+    /// オプション画面へ
+    /// </summary>
     public void LoadOption()
     {
         Time.timeScale = 1f;

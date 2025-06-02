@@ -11,13 +11,15 @@ public class AgentController : MonoBehaviour, ITeleportable
     private float alpha = 0.1f;
 
     [Tooltip("割引率")] [SerializeField] private float gamma = 0.9f;
-
+    
     private float[] _weights; //wベクトル(センサー数分)
     private bool[] _sensorEnabled;//センサのEnable情報
     private Queue<(List<float>features, float reward)> _creditBuffer;
     private int _bufferLength = 5; //遡って報酬を割り当てるステップ数
     private int _pendingHumanReward = 0; //次のUpdateで消費するフィードバック
     private List<float> _lastFeatures;
+    private RewardConfig _rewardConfig;
+    
 
 
     /*----グリッドベース移動制御のフィールド----*/
@@ -36,19 +38,22 @@ public class AgentController : MonoBehaviour, ITeleportable
     private Rigidbody _rb;
     private AgentStatus _agentStatus;
 
+    private TrapManager _trapManager;
+
 
     private void Awake()
     {
         //AgentManagerに追加
         AgentManager.I.Register(this);
-        
         _agentStatus = GetComponent<AgentStatus>();
         _agentStatus.OnDeath += HandleDeath;
+        
+        //TrapManagerを取得
+        _trapManager = FindFirstObjectByType<TrapManager>();
     }
 
     private void Start()
     {
-        //強化学習の初期化処理をAwakeからStartに変更
         //強化学習 : 重みとバッファ初期化
         int featureCount = _sensors.Length;
         _weights = new float[featureCount];
@@ -213,12 +218,32 @@ public class AgentController : MonoBehaviour, ITeleportable
         {
             _isMoving = false;
             _currentGrid = _targetGrid;
-            VisitedManager.I.MarkVisited(_currentGrid);
-
-            if (_currentGrid == _grid.WorldToCell(_goalTransform.position))
+            
+            // 1)未訪問セル報酬
+            if (!VisitedManager.I.HasVisited(_currentGrid))
             {
-                _isGoal = true;
+                ApplyCreditAssignment(_rewardConfig.unvisitedCellReward);
             }
+            VisitedManager.I.MarkVisited(_currentGrid);
+            
+            // 2)罠予兆ペナルティ(視野範囲内の罠)
+            
+            // 3)罠セルを踏んだときのペナルティ
+            if (_trapManager.IsTrap(_currentGrid))
+            {
+                ApplyCreditAssignment(_rewardConfig.trapPenalty);
+            }
+            
+            // 4)ゴール到達
+            else if (_currentGrid == _grid.WorldToCell(_goalTransform.position))
+            {
+                ApplyCreditAssignment(_rewardConfig.goalReward);
+                _isGoal = true;
+                GameManager.I.TriggerStageClear();
+            }
+            
+            // 5)ステップコスト(時間ペナルティ)
+            ApplyCreditAssignment(_rewardConfig.stepPenalty);
         }
     }
 
@@ -254,7 +279,7 @@ public class AgentController : MonoBehaviour, ITeleportable
     private void HandleDeath()
     {
         _isMoving = false;
-        UIManager.I.ShowGameOverUI();
+        GameManager.I.TriggerGameOver();
     }
 
     /*----------------強化学習周りのメソッド----------------*/
@@ -263,7 +288,10 @@ public class AgentController : MonoBehaviour, ITeleportable
     /// </summary>
     private void ReceiveFeedback(int humanReward)
     {
-        _pendingHumanReward += humanReward;
+        Debug.Log("Pushed");
+        float scaled = humanReward * _rewardConfig.humanFeedbackMultiplier;
+        ApplyCreditAssignment(scaled);
+        // _pendingHumanReward += humanReward;
     }
 
     /// <summary>
@@ -299,17 +327,16 @@ public class AgentController : MonoBehaviour, ITeleportable
     private void ApplyCreditAssignment(float envReward)
     {
         //環境報酬　+ 人間報酬
-        float r = envReward + _pendingHumanReward;
-        _pendingHumanReward = 0;
+        float r = envReward;
+        // _pendingHumanReward = 0;
 
         //ステップ分割当
-        float perReward = r;
+        // float perReward = r;
         while (_creditBuffer.Count > 0)
         {
             var (phy, _) = _creditBuffer.Dequeue();
             float qPred = EstimateQ(phy);
-            float target = perReward;
-            float delta = target - qPred;
+            float delta = r - qPred;
             for (int i = 0; i < _weights.Length; i++)
                 _weights[i] += alpha * delta * phy[i];
             //減衰させる場合は perReward * gamma

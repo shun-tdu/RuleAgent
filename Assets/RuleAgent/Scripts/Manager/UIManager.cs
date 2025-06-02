@@ -3,6 +3,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
@@ -15,6 +16,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI currencyText;
     [SerializeField] private CanvasGroup gameOverGroup;
+    [SerializeField] private CanvasGroup stageClearGroup;
     [SerializeField] private float fadeDuration = 0.5f;
     [SerializeField] private float popDuration = 0.4f;
     [SerializeField] private Vector3 hiddenScale = Vector3.zero;
@@ -36,6 +38,12 @@ public class UIManager : MonoBehaviour
         gameOverGroup.interactable = false;
         gameOverGroup.blocksRaycasts = false;
         gameOverGroup.transform.localScale = hiddenScale;
+        
+        //StageClearGroupの初期化
+        stageClearGroup.alpha = 0f;
+        stageClearGroup.interactable = false;
+        stageClearGroup.blocksRaycasts = false;
+        stageClearGroup.transform.localScale = hiddenScale;
     }
 
     private void Start()
@@ -94,6 +102,31 @@ public class UIManager : MonoBehaviour
         {
             gameOverGroup.interactable = true;
             gameOverGroup.blocksRaycasts = true;
+        });
+    }
+
+    public void ShowStageClearUI()
+    {
+        Debug.Log("GameClear");
+        stageClearGroup.gameObject.SetActive(true);
+
+        Time.timeScale = 0f;
+
+        var seq = DOTween.Sequence();
+        seq.SetUpdate(true);
+        seq.Append(stageClearGroup.DOFade(1f, fadeDuration));
+        seq.Join(stageClearGroup.transform
+            .DOScale(shownScale * 1.2f, popDuration)
+            .SetEase(Ease.OutBack)
+        );
+        seq.Append(stageClearGroup.transform
+            .DOScale(shownScale, popDuration * 0.5f)
+            .SetEase(Ease.OutBack)
+        );
+        seq.OnComplete(() =>
+        {
+            stageClearGroup.interactable = true;
+            stageClearGroup.blocksRaycasts = true;
         });
     }
 }

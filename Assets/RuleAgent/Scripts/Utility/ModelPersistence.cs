@@ -3,22 +3,22 @@ using UnityEngine;
 
 public static class ModelPersistence
 {
-    private static string Path => PathCombine();
-
-    private static string PathCombine()
-    {
-        return System.IO.Path.Combine(Application.persistentDataPath, "learned_model.json");
-    }
+    private static string FilePath => Path.Combine(Application.dataPath, "../SavedModels/learned_model.json");
     
+
     /// <summary>
     /// Json形式で学習済みモデルをセーブ
     /// </summary>
     public static void Save(LeanedModel model)
     {
+        var fullDir = Path.GetDirectoryName(FilePath);
+        if (!Directory.Exists(fullDir))
+            Directory.CreateDirectory(fullDir);
+        
         model.sensorEnabled = CustomizationState.CurrentConfig.sensorEnabled;
         string json = JsonUtility.ToJson(model);
-        File.WriteAllText(Path, json);
-        Debug.Log("Model saved to " + Path);
+        File.WriteAllText(FilePath, json);
+        Debug.Log("Model saved to " + Path.GetFullPath(FilePath));
     }
 
     /// <summary>
@@ -26,8 +26,8 @@ public static class ModelPersistence
     /// </summary>
     public static LeanedModel Load()
     {
-        if (!File.Exists(Path)) return null;
-        string json = File.ReadAllText(Path);
+        if (!File.Exists(FilePath)) return null;
+        string json = File.ReadAllText(FilePath);
         return JsonUtility.FromJson<LeanedModel>(json);
     }
 }

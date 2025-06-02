@@ -15,4 +15,12 @@ public class TrapManager : MonoBehaviour
             Instantiate(info.trapPrefab, worldPos, Quaternion.identity, transform);
         }
     }
+        
+    /// <summary>
+    /// 指定した位置にトラップが存在するかを返す
+    /// </summary>
+    public bool IsTrap(Vector2Int targetPosition)
+    {
+        return levelData.trapList.Exists(trap => trap.position == targetPosition);
+    }
 }
